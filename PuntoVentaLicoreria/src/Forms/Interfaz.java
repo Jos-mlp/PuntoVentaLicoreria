@@ -345,95 +345,84 @@ public class Interfaz extends javax.swing.JFrame {
        }
     }
     
-    private void ConfirmarCompra() throws SQLException, Exception{
-        //aca van las cosas necesarias para la insercion
-        Connection cn = null;
-        PreparedStatement ps = null;
-        PreparedStatement ps2 = null;
-        int id = 0,res=0;
-        ResultSet Resultado;
-        String SQL_INSERT = "INSERT INTO libreria1.compra(Fecha,Total,Usuario_ID,Proveedor_ID)" + " VALUES(?,?,?,?)";
-        String SQL_INSERT2 = "INSERT INTO libreria1.detallecompra(Cantidad,Subtotal,Compra_ID,Inventario_ID)" + " VALUES(?,?,?,?)";
-        //aca debe ir la segunda transaccion
-        //
-        //
-        //
-        try {
-            cn = cnx.getConnection();
-            cn.setAutoCommit(false);
-                //Inserta una nueva compra
-                int id_proveedor = Integer.parseInt(CodigoProveedor.getText());
-                //aca debe de ir el codigo que inserta una nueva compra
-                        ps = cn.prepareStatement(SQL_INSERT, Statement.RETURN_GENERATED_KEYS);
-                        ps.setDate(1, null);
-                        ps.setFloat(2, totalCompra);
-                        ps.setInt(3, empleado);
-                        ps.setInt(4, id_proveedor);
-                        res = ps.executeUpdate();
-                        Resultado = (ResultSet) ps.getGeneratedKeys();
-                         if (Resultado.next()) {
-                            //regresa el id que sirve para insertar varias compras
-                            id = Resultado.getInt(1);
-                         }
-                        if (res > 0) {
-                            JOptionPane.showMessageDialog(null, "Registro Guardado..........");
-                        }else{
-                            cn.rollback();
-                            JOptionPane.showMessageDialog(null, "Fallo la transaccion");
-                        }                     
-                //aca termina
-            //Insertar los datos de la venta
-            int filas=dtmC.getRowCount();
-            for(int i=0;i<filas;i++){
-              
-              //Inserta en la base de datos
-                int cantidad = (int) (dtmC.getValueAt(i, 3));
-                float subTotal = (float) (dtmC.getValueAt(i, 5));
-                String codCompra = (String) (dtmC.getValueAt(i, 0));
-                int codigo = Integer.parseInt(codCompra);
-                
-                //Aca debe de ir el codigo que actualiza los datos de compra
-                ps2 = cn.prepareStatement(SQL_INSERT2);
-                ps2.setInt(1, cantidad);
-                ps2.setFloat(2,subTotal);
-                ps2.setInt(3, id);
-                ps2.setInt(4, codigo);
-                int res2 = ps2.executeUpdate();
-            
-                if (res2 > 0) {
-                    JOptionPane.showMessageDialog(null, "Registro Guardado..........");
-                }else{
-                    cn.rollback();
-                    JOptionPane.showMessageDialog(null, "Fallo la transaccion");
-                }
-                      //aca termina
+    private void confirmarCompra() throws SQLException, Exception {
+    Connection cn = null;
+    PreparedStatement ps = null;
+    PreparedStatement ps2 = null;
+    int id = 0;
+    
+    try {
+        cn = cnx.getConnection();
+        cn.setAutoCommit(false);
+        
+        // Insertar una nueva compra
+        String SQL_INSERT = "INSERT INTO libreria1.compra(Fecha,Total,Usuario_ID,Proveedor_ID) VALUES(?,?,?,?)";
+        ps = cn.prepareStatement(SQL_INSERT, Statement.RETURN_GENERATED_KEYS);
+        ps.setDate(1, new java.sql.Date(System.currentTimeMillis())); // Establecer la fecha actual
+        ps.setFloat(2, totalCompra);
+        ps.setInt(3, empleado);
+        ps.setInt(4, Integer.parseInt(CodigoProveedor.getText()));
+        int res = ps.executeUpdate();
+        if (res > 0) {
+            ResultSet generatedKeys = ps.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                id = generatedKeys.getInt(1);
             }
-            
-            int result = JOptionPane.showConfirmDialog(frame,"¿Seguro? ¿Quieres confirmar esta compra?", "Confirmar Compra",
-              JOptionPane.YES_NO_OPTION,
-              JOptionPane.QUESTION_MESSAGE);
-            if(result == JOptionPane.YES_OPTION){
-                cn.commit();
-           
-                //Borra toda la linea
-                int filas2=dtmC.getRowCount();
-                for(int i=0;i<filas2;i++){
-                   dtmC.removeRow(0);
-                }
-                //Por ultimo tiene que limpiar todo 
-                LimpiarVenta();
-            }else{
-                cn.rollback();
-                JOptionPane.showMessageDialog(null, "Transaccion Cancelada");
+            JOptionPane.showMessageDialog(null, "Compra registrada correctamente.");
+        } else {
+            throw new SQLException("Fallo al insertar la compra.");
+        }
+        
+        // Insertar los detalles de la compra
+        String SQL_INSERT2 = "INSERT INTO libreria1.detallecompra(Cantidad,Subtotal,Compra_ID,Inventario_ID) VALUES(?,?,?,?)";
+        ps2 = cn.prepareStatement(SQL_INSERT2);
+        int filas = dtmC.getRowCount();
+        for (int i = 0; i < filas; i++) {
+            int cantidad = (int) dtmC.getValueAt(i, 3);
+            float subTotal = (float) dtmC.getValueAt(i, 5);
+            int codigo = Integer.parseInt((String) dtmC.getValueAt(i, 0));
+            ps2.setInt(1, cantidad);
+            ps2.setFloat(2, subTotal);
+            ps2.setInt(3, id);
+            ps2.setInt(4, codigo);
+            ps2.addBatch(); // Agregar a lote para ejecución eficiente
+        }
+        int[] res2 = ps2.executeBatch();
+        for (int result : res2) {
+            if (result <= 0) {
+                throw new SQLException("Fallo al insertar un detalle de la compra.");
             }
-        }catch(Exception e){
+        }
+        
+        // Confirmar la compra
+        int result = JOptionPane.showConfirmDialog(frame, "¿Seguro que quieres confirmar esta compra?", "Confirmar Compra", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+        if (result == JOptionPane.YES_OPTION) {
+            cn.commit();
+            CancelarCompra(); // Supongamos que tienes un método para limpiar la tabla de compras
+            
+        } else {
             cn.rollback();
-            JOptionPane.showMessageDialog(null, "Fallo la transaccion");
-        }finally{
-            ps = null;
+            JOptionPane.showMessageDialog(null, "Transacción cancelada.");
+        }
+    } catch (SQLException e) {
+        if (cn != null) {
+            cn.rollback();
+        }
+        JOptionPane.showMessageDialog(null, "Error al confirmar la compra: " + e.getMessage());
+    } finally {
+        if (ps != null) {
+            ps.close();
+        }
+        if (ps2 != null) {
+            ps2.close();
+        }
+        if (cn != null) {
+            cn.setAutoCommit(true); // Restaurar el comportamiento predeterminado
             cn.close();
         }
     }
+    }
+
     
     private void LimpiarCompra(){
         CodigoCompraTxt.setText("");
@@ -2327,7 +2316,7 @@ public class Interfaz extends javax.swing.JFrame {
     private void EliminarBtn7MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_EliminarBtn7MouseClicked
         
         try {
-            ConfirmarCompra();
+            confirmarCompra();
         } catch (Exception ex) {
             Logger.getLogger(Interfaz.class.getName()).log(Level.SEVERE, null, ex);
         }
