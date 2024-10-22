@@ -10,7 +10,7 @@ public class ConexionBD {
     private Connection con;
     private static final String driver="com.mysql.jdbc.Driver";
     private static final String user="root"; //esto no lo toquen, todo va a ser en root supongo, si alguien le colocó otro usuario pues cambienlo
-    private static final String pass="12345";
+    private static final String pass="mysqluwu";
     private static final String url="jdbc:mysql://localhost:3306/?user=root/libreria1?autoReconnect=true&useSSL=false";
     
     public ConexionBD(){

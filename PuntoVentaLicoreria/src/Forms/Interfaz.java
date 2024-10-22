@@ -344,7 +344,7 @@ public class Interfaz extends javax.swing.JFrame {
           TotalCompraLabel.setText("Total: " + totalCompra);
        }
     }
-    
+ /*   
     private void confirmarCompra() throws SQLException, Exception {
     Connection cn = null;
     PreparedStatement ps = null;
@@ -395,6 +395,7 @@ public class Interfaz extends javax.swing.JFrame {
         }
         
         // Confirmar la compra
+        
         int result = JOptionPane.showConfirmDialog(frame, "¿Seguro que quieres confirmar esta compra?", "Confirmar Compra", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
         if (result == JOptionPane.YES_OPTION) {
             cn.commit();
@@ -404,6 +405,95 @@ public class Interfaz extends javax.swing.JFrame {
             cn.rollback();
             JOptionPane.showMessageDialog(null, "Transacción cancelada.");
         }
+    } catch (SQLException e) {
+        if (cn != null) {
+            cn.rollback();
+        }
+        JOptionPane.showMessageDialog(null, "Error al confirmar la compra: " + e.getMessage());
+    }
+    
+    finally {
+        if (ps != null) {
+            ps.close();
+        }
+        if (ps2 != null) {
+            ps2.close();
+        }
+        if (cn != null) {
+            cn.setAutoCommit(true); // Restaurar el comportamiento predeterminado
+            cn.close();
+        }
+    }
+    }
+
+ */
+    
+    private void confirmarCompra() throws SQLException, Exception {
+    Connection cn = null;
+    PreparedStatement ps = null;
+    PreparedStatement ps2 = null;
+    int id = 0;
+
+    try {
+        cn = cnx.getConnection();
+        cn.setAutoCommit(false);
+
+        // Insertar una nueva compra
+        String SQL_INSERT = "INSERT INTO libreria1.compra(Fecha,Total,Usuario_ID,Proveedor_ID) VALUES(?,?,?,?)";
+        ps = cn.prepareStatement(SQL_INSERT, Statement.RETURN_GENERATED_KEYS);
+        ps.setDate(1, new java.sql.Date(System.currentTimeMillis())); // Establecer la fecha actual
+        ps.setFloat(2, totalCompra);
+        ps.setInt(3, empleado);
+        ps.setInt(4, Integer.parseInt(CodigoProveedor.getText()));
+        int res = ps.executeUpdate();
+        if (res > 0) {
+            ResultSet generatedKeys = ps.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                id = generatedKeys.getInt(1);
+            }
+            JOptionPane.showMessageDialog(null, "Compra registrada correctamente.");
+        } else {
+            throw new SQLException("Fallo al insertar la compra.");
+        }
+
+        // Insertar los detalles de la compra
+        String SQL_INSERT2 = "INSERT INTO libreria1.detallecompra(Cantidad,Subtotal,Compra_ID,Inventario_ID) VALUES(?,?,?,?)";
+        ps2 = cn.prepareStatement(SQL_INSERT2);
+        int filas = dtmC.getRowCount();
+        for (int i = 0; i < filas; i++) {
+            int cantidad = (int) dtmC.getValueAt(i, 3);
+            float subTotal = (float) dtmC.getValueAt(i, 5);
+            int codigo = Integer.parseInt((String) dtmC.getValueAt(i, 0));
+            ps2.setInt(1, cantidad);
+            ps2.setFloat(2, subTotal);
+            ps2.setInt(3, id);
+            ps2.setInt(4, codigo);
+            ps2.addBatch(); // Agregar a lote para ejecución eficiente
+        }
+        int[] res2 = ps2.executeBatch();
+        for (int result : res2) {
+            if (result <= 0) {
+                throw new SQLException("Fallo al insertar un detalle de la compra.");
+            }
+        }
+
+        // Confirmar la compra
+        int result = JOptionPane.showConfirmDialog(frame, "¿Seguro que quieres confirmar esta compra?", "Confirmar Compra", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+       
+        if (result == JOptionPane.YES_OPTION) {
+            // Solo commit si todo salió bien
+            cn.commit();
+            CancelarCompra(); // Método para limpiar la tabla de compras
+            JOptionPane.showMessageDialog(null, "Compra confirmada exitosamente.");
+        } else if (result == JOptionPane.NO_OPTION) {
+            cn.rollback();
+            JOptionPane.showMessageDialog(null, "Transacción cancelada por el usuario.");
+        } else {
+            // En caso de que el cuadro de confirmación se cierre sin respuesta clara
+            cn.rollback();
+            JOptionPane.showMessageDialog(null, "Transacción cancelada.");
+        }
+
     } catch (SQLException e) {
         if (cn != null) {
             cn.rollback();
@@ -421,9 +511,8 @@ public class Interfaz extends javax.swing.JFrame {
             cn.close();
         }
     }
-    }
+}
 
-    
     private void LimpiarCompra(){
         CodigoCompraTxt.setText("");
         NombreCompraTxt.setText("");
@@ -495,8 +584,6 @@ public class Interfaz extends javax.swing.JFrame {
         VentaJTable = new javax.swing.JTable();
         jPanel4 = new javax.swing.JPanel();
         jPanel10 = new javax.swing.JPanel();
-        jPanel11 = new javax.swing.JPanel();
-        jLabel20 = new javax.swing.JLabel();
         jPanel12 = new javax.swing.JPanel();
         jLabel21 = new javax.swing.JLabel();
         txtID = new javax.swing.JTextField();
@@ -605,17 +692,21 @@ public class Interfaz extends javax.swing.JFrame {
         ProveedoresTxt = new javax.swing.JLabel();
         ComprasBtn = new javax.swing.JPanel();
         ComprasTxt = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
         ConfiBtn = new javax.swing.JPanel();
         Configuracion = new javax.swing.JLabel();
         UsuariosBtn = new javax.swing.JPanel();
         UsuariosTxt = new javax.swing.JLabel();
+        jPanel25 = new javax.swing.JPanel();
+        jLabel2 = new javax.swing.JLabel();
         EmpleadoLabel = new javax.swing.JLabel();
+        jPanel26 = new javax.swing.JPanel();
+        jPanel11 = new javax.swing.JPanel();
+        jLabel20 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setUndecorated(true);
 
-        jPanel1.setBackground(new java.awt.Color(51, 51, 255));
+        jPanel1.setBackground(new java.awt.Color(255, 255, 255));
         jPanel1.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 jPanel1MouseEntered(evt);
@@ -631,7 +722,8 @@ public class Interfaz extends javax.swing.JFrame {
         });
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        SalirPanel.setBackground(new java.awt.Color(255, 255, 255));
+        SalirPanel.setBackground(new java.awt.Color(0, 153, 204));
+        SalirPanel.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         SalirPanel.setName(""); // NOI18N
 
         SalirTxt.setFont(new java.awt.Font("Roboto Light", 0, 24)); // NOI18N
@@ -654,14 +746,18 @@ public class Interfaz extends javax.swing.JFrame {
         SalirPanel.setLayout(SalirPanelLayout);
         SalirPanelLayout.setHorizontalGroup(
             SalirPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(SalirTxt, javax.swing.GroupLayout.DEFAULT_SIZE, 30, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, SalirPanelLayout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(SalirTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         SalirPanelLayout.setVerticalGroup(
             SalirPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(SalirTxt, javax.swing.GroupLayout.DEFAULT_SIZE, 30, Short.MAX_VALUE)
+            .addGroup(SalirPanelLayout.createSequentialGroup()
+                .addComponent(SalirTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
 
-        jPanel1.add(SalirPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 30, 30));
+        jPanel1.add(SalirPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(1250, 0, 30, 30));
 
         Barra.setBackground(new java.awt.Color(255, 255, 255));
         Barra.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
@@ -679,16 +775,18 @@ public class Interfaz extends javax.swing.JFrame {
         Barra.setLayout(BarraLayout);
         BarraLayout.setHorizontalGroup(
             BarraLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1280, Short.MAX_VALUE)
+            .addGap(0, 0, Short.MAX_VALUE)
         );
         BarraLayout.setVerticalGroup(
             BarraLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 30, Short.MAX_VALUE)
+            .addGap(0, 0, Short.MAX_VALUE)
         );
 
         jPanel1.add(Barra, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1280, -1));
 
         jTabbedPane1.setBackground(new java.awt.Color(255, 255, 255));
+        jTabbedPane1.setTabLayoutPolicy(javax.swing.JTabbedPane.SCROLL_TAB_LAYOUT);
+        jTabbedPane1.setTabPlacement(javax.swing.JTabbedPane.BOTTOM);
 
         jPanel3.setBackground(new java.awt.Color(255, 255, 255));
         jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -826,7 +924,7 @@ public class Interfaz extends javax.swing.JFrame {
                 CancelarVentaBtnActionPerformed(evt);
             }
         });
-        jPanel2.add(CancelarVentaBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(890, 120, 150, -1));
+        jPanel2.add(CancelarVentaBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(820, 120, 150, -1));
 
         ConfirmarVentaBtn.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         ConfirmarVentaBtn.setText("Confirmar Venta");
@@ -840,13 +938,13 @@ public class Interfaz extends javax.swing.JFrame {
                 ConfirmarVentaBtnActionPerformed(evt);
             }
         });
-        jPanel2.add(ConfirmarVentaBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(890, 90, -1, -1));
+        jPanel2.add(ConfirmarVentaBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(820, 80, -1, -1));
 
         TotalVentaLabel.setFont(new java.awt.Font("Roboto", 0, 24)); // NOI18N
         TotalVentaLabel.setText("Total: 0");
         jPanel2.add(TotalVentaLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(890, 20, -1, -1));
 
-        jPanel3.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1060, 160));
+        jPanel3.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 0, 1060, 160));
 
         VentaJTable.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
         VentaJTable.setModel(new javax.swing.table.DefaultTableModel(
@@ -879,31 +977,6 @@ public class Interfaz extends javax.swing.JFrame {
 
         jPanel10.setBackground(new java.awt.Color(255, 255, 255));
         jPanel10.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        jPanel11.setBackground(new java.awt.Color(0, 0, 0));
-
-        jLabel20.setBackground(new java.awt.Color(255, 255, 255));
-        jLabel20.setFont(new java.awt.Font("Arial", 1, 24)); // NOI18N
-        jLabel20.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel20.setText("INVENTARIO");
-
-        javax.swing.GroupLayout jPanel11Layout = new javax.swing.GroupLayout(jPanel11);
-        jPanel11.setLayout(jPanel11Layout);
-        jPanel11Layout.setHorizontalGroup(
-            jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel11Layout.createSequentialGroup()
-                .addContainerGap(509, Short.MAX_VALUE)
-                .addComponent(jLabel20)
-                .addGap(404, 404, 404))
-        );
-        jPanel11Layout.setVerticalGroup(
-            jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel11Layout.createSequentialGroup()
-                .addComponent(jLabel20, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
-        );
-
-        jPanel10.add(jPanel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1060, 40));
 
         jPanel12.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Datos", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Arial", 1, 12))); // NOI18N
 
@@ -1785,7 +1858,8 @@ public class Interfaz extends javax.swing.JFrame {
 
         jTabbedPane1.addTab("tab6", jPanel16);
 
-        jPanel1.add(jTabbedPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 200, 1060, 620));
+        jPanel1.add(jTabbedPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 200, 1060, 650));
+        jTabbedPane1.getAccessibleContext().setAccessibleDescription("");
 
         NuevaVentaBtn.setBackground(new java.awt.Color(0, 153, 204));
 
@@ -1811,8 +1885,9 @@ public class Interfaz extends javax.swing.JFrame {
         NuevaVentaBtnLayout.setHorizontalGroup(
             NuevaVentaBtnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, NuevaVentaBtnLayout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(NuevaVentaTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(NuevaVentaTxt)
+                .addGap(79, 79, 79))
         );
         NuevaVentaBtnLayout.setVerticalGroup(
             NuevaVentaBtnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1821,7 +1896,7 @@ public class Interfaz extends javax.swing.JFrame {
                 .addComponent(NuevaVentaTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
-        jPanel1.add(NuevaVentaBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 270, 220, 70));
+        jPanel1.add(NuevaVentaBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 150, 220, 70));
 
         InventarioBtn.setBackground(new java.awt.Color(0, 153, 204));
 
@@ -1859,7 +1934,7 @@ public class Interfaz extends javax.swing.JFrame {
                 .addComponent(InventarioTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
-        jPanel1.add(InventarioBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 360, -1, -1));
+        jPanel1.add(InventarioBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 240, -1, -1));
 
         ProveedoresBtn.setBackground(new java.awt.Color(0, 153, 204));
 
@@ -1897,7 +1972,7 @@ public class Interfaz extends javax.swing.JFrame {
                 .addComponent(ProveedoresTxt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
-        jPanel1.add(ProveedoresBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 450, -1, -1));
+        jPanel1.add(ProveedoresBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 330, -1, -1));
 
         ComprasBtn.setBackground(new java.awt.Color(0, 153, 204));
 
@@ -1935,11 +2010,7 @@ public class Interfaz extends javax.swing.JFrame {
                 .addComponent(ComprasTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
-        jPanel1.add(ComprasBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 540, -1, -1));
-
-        jLabel2.setFont(new java.awt.Font("Roboto Black", 0, 72)); // NOI18N
-        jLabel2.setText("LICORERIA");
-        jPanel1.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 40, -1, -1));
+        jPanel1.add(ComprasBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 420, -1, -1));
 
         ConfiBtn.setBackground(new java.awt.Color(0, 153, 204));
 
@@ -1975,7 +2046,7 @@ public class Interfaz extends javax.swing.JFrame {
                 .addComponent(Configuracion, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
-        jPanel1.add(ConfiBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 720, -1, -1));
+        jPanel1.add(ConfiBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 600, -1, -1));
 
         UsuariosBtn.setBackground(new java.awt.Color(0, 153, 204));
 
@@ -2011,11 +2082,18 @@ public class Interfaz extends javax.swing.JFrame {
                 .addComponent(UsuariosTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
-        jPanel1.add(UsuariosBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 630, -1, -1));
+        jPanel1.add(UsuariosBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 510, -1, -1));
 
-        EmpleadoLabel.setFont(new java.awt.Font("Roboto", 0, 24)); // NOI18N
+        jPanel25.setBackground(new java.awt.Color(0, 153, 204));
+
+        jLabel2.setFont(new java.awt.Font("Roboto Black", 1, 22)); // NOI18N
+        jLabel2.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel2.setText("Licorera Don Roca");
+
+        EmpleadoLabel.setFont(new java.awt.Font("Roboto", 1, 24)); // NOI18N
         EmpleadoLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         EmpleadoLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/userInterfaz.png"))); // NOI18N
+        EmpleadoLabel.setToolTipText("");
         EmpleadoLabel.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         EmpleadoLabel.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -2028,7 +2106,68 @@ public class Interfaz extends javax.swing.JFrame {
                 EmpleadoLabelMouseExited(evt);
             }
         });
-        jPanel1.add(EmpleadoLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(1010, 30, 270, 50));
+
+        javax.swing.GroupLayout jPanel25Layout = new javax.swing.GroupLayout(jPanel25);
+        jPanel25.setLayout(jPanel25Layout);
+        jPanel25Layout.setHorizontalGroup(
+            jPanel25Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel25Layout.createSequentialGroup()
+                .addGap(38, 38, 38)
+                .addComponent(jLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 722, Short.MAX_VALUE)
+                .addComponent(EmpleadoLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 249, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(40, 40, 40))
+        );
+        jPanel25Layout.setVerticalGroup(
+            jPanel25Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel25Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addComponent(EmpleadoLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+        );
+
+        jPanel1.add(jPanel25, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1250, 30));
+
+        jPanel26.setBackground(new java.awt.Color(0, 0, 0));
+
+        javax.swing.GroupLayout jPanel26Layout = new javax.swing.GroupLayout(jPanel26);
+        jPanel26.setLayout(jPanel26Layout);
+        jPanel26Layout.setHorizontalGroup(
+            jPanel26Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+        jPanel26Layout.setVerticalGroup(
+            jPanel26Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+
+        jPanel1.add(jPanel26, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 30, 220, 820));
+
+        jPanel11.setBackground(new java.awt.Color(0, 0, 0));
+
+        jLabel20.setBackground(new java.awt.Color(255, 255, 255));
+        jLabel20.setFont(new java.awt.Font("Arial", 1, 24)); // NOI18N
+        jLabel20.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel20.setText("INVENTARIO");
+
+        javax.swing.GroupLayout jPanel11Layout = new javax.swing.GroupLayout(jPanel11);
+        jPanel11.setLayout(jPanel11Layout);
+        jPanel11Layout.setHorizontalGroup(
+            jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel11Layout.createSequentialGroup()
+                .addContainerGap(509, Short.MAX_VALUE)
+                .addComponent(jLabel20)
+                .addGap(404, 404, 404))
+        );
+        jPanel11Layout.setVerticalGroup(
+            jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel11Layout.createSequentialGroup()
+                .addComponent(jLabel20, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
+        );
+
+        jPanel1.add(jPanel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 150, -1, 40));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -2044,6 +2183,8 @@ public class Interfaz extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    
+    
     private void SalirTxtMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_SalirTxtMouseClicked
         System.exit(0);
     }//GEN-LAST:event_SalirTxtMouseClicked
@@ -2805,6 +2946,8 @@ public class Interfaz extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel22;
     private javax.swing.JPanel jPanel23;
     private javax.swing.JPanel jPanel24;
+    private javax.swing.JPanel jPanel25;
+    private javax.swing.JPanel jPanel26;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
