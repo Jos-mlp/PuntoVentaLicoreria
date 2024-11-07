@@ -194,17 +194,17 @@ public class Login extends javax.swing.JFrame {
         );
 
         jPanel1.add(Barra, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 880, 30));
-        jPanel1.add(jSeparator2, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 190, 300, -1));
-        jPanel1.add(jSeparator3, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 290, 300, -1));
+        jPanel1.add(jSeparator2, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 183, 300, 10));
+        jPanel1.add(jSeparator3, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 283, 300, 10));
 
-        TituloTxt.setFont(new java.awt.Font("Roboto Black", 0, 24)); // NOI18N
+        TituloTxt.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
         TituloTxt.setForeground(new java.awt.Color(0, 0, 0));
-        TituloTxt.setText("Bienvenido ");
-        jPanel1.add(TituloTxt, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 40, -1, -1));
+        TituloTxt.setText("Bienvenido! ");
+        jPanel1.add(TituloTxt, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 50, -1, -1));
 
         Usuariotxt.setBackground(new java.awt.Color(204, 204, 204));
-        Usuariotxt.setFont(new java.awt.Font("Roboto Light", 1, 14)); // NOI18N
-        Usuariotxt.setForeground(new java.awt.Color(153, 153, 153));
+        Usuariotxt.setFont(new java.awt.Font("Roboto Light", 1, 12)); // NOI18N
+        Usuariotxt.setForeground(new java.awt.Color(102, 102, 102));
         Usuariotxt.setText("INGRESE SU NOMBRE DE USUARIO");
         Usuariotxt.setBorder(null);
         Usuariotxt.addFocusListener(new java.awt.event.FocusAdapter() {
@@ -227,7 +227,7 @@ public class Login extends javax.swing.JFrame {
                 UsuariotxtKeyPressed(evt);
             }
         });
-        jPanel1.add(Usuariotxt, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 160, 300, 30));
+        jPanel1.add(Usuariotxt, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 150, 300, 30));
 
         PassTxt.setBackground(new java.awt.Color(204, 204, 204));
         PassTxt.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
@@ -249,17 +249,18 @@ public class Login extends javax.swing.JFrame {
                 PassTxtKeyPressed(evt);
             }
         });
-        jPanel1.add(PassTxt, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 250, 300, 30));
+        jPanel1.add(PassTxt, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 250, 300, 30));
 
         PassLabel.setFont(new java.awt.Font("Roboto Light", 1, 14)); // NOI18N
         PassLabel.setText("CONTRASEÑA");
-        jPanel1.add(PassLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 230, 110, 10));
+        jPanel1.add(PassLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 220, 110, 20));
 
         UserLabel.setFont(new java.awt.Font("Roboto Light", 1, 14)); // NOI18N
         UserLabel.setText("USUARIO");
-        jPanel1.add(UserLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 140, 90, 10));
+        jPanel1.add(UserLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 130, 90, 20));
 
         IngresarPanel.setBackground(new java.awt.Color(36, 128, 236));
+        IngresarPanel.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, null, null, null, new java.awt.Color(0, 0, 0)));
 
         BIngresar.setBackground(new java.awt.Color(51, 153, 255));
         BIngresar.setFont(new java.awt.Font("Roboto Light", 1, 12)); // NOI18N
@@ -291,30 +292,35 @@ public class Login extends javax.swing.JFrame {
             IngresarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(IngresarPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(BIngresar, javax.swing.GroupLayout.DEFAULT_SIZE, 18, Short.MAX_VALUE)
+                .addComponent(BIngresar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
-        jPanel1.add(IngresarPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 320, 110, 30));
+        jPanel1.add(IngresarPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 320, 110, 30));
 
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/botellalogin.png"))); // NOI18N
-        jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 360, 40, 80));
+        jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 360, 40, 80));
 
-        TituloTxt1.setFont(new java.awt.Font("Roboto Black", 0, 24)); // NOI18N
+        TituloTxt1.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
         TituloTxt1.setForeground(new java.awt.Color(0, 0, 0));
         TituloTxt1.setText("Licores Don Roca");
-        jPanel1.add(TituloTxt1, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 70, -1, 40));
+        jPanel1.add(TituloTxt1, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 80, -1, 40));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 881, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(0, 12, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 881, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 462, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 462, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
 
         pack();
